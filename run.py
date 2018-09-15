@@ -13,13 +13,14 @@ y_data = 7*np.sin(0.75*x_data) + 0.5*x_data + epsilon
 y_data, x_data = x_data.view(-1, 1), y_data.view(-1, 1)
 
 plt.ion()
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
-line1 = ax.scatter(y_data.numpy(), x_data.numpy(), alpha=0.4)
+#fig = plt.figure(figsize=(4, 10))
+fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(8, 4))
+line1 = ax1.scatter(y_data.numpy(), x_data.numpy(), alpha=0.5, s=0.8)
+line1 = ax2.scatter(y_data.numpy(), x_data.numpy(), alpha=0.5, s=0.8)
 line2 = None
 line3 = None
 fig.canvas.draw()
-fig.savefig('initial.png', bbox_inches='tight')
+fig.savefig('images/initial.png', bbox_inches='tight')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 x_data = x_data.to(device)
@@ -37,13 +38,13 @@ model = nn.Sequential(nn.Linear(1, hidden_size),
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 mseloss = nn.MSELoss()
 
-for epoch in range(10000):
+for epoch in range(130):
     optimizer.zero_grad()
     y = model(x_data)
     loss = mseloss(x_data, y)
     loss.backward()
     optimizer.step()
-    if epoch % 1000 == 0:
+    if epoch % 10 == 0:
         print('Loss: ' + str(loss.item()))
         y_pred = model(x_data)
 
@@ -51,11 +52,11 @@ for epoch in range(10000):
         y_plot = y_pred.data.squeeze().cpu().numpy()
 
         if line2 is None:
-            line2 = ax.scatter(y_plot, x_plot, alpha=0.4)
+            line2 = ax1.scatter(y_plot, x_plot, alpha=0.6, s=0.9)
         else:
             line2.set_offsets(np.c_[y_plot, x_plot])
         fig.canvas.draw_idle()
-        fig.savefig('linear' + str(epoch) + '.png', bbox_inches='tight')
+        fig.savefig('images/linear%04d.png' % (epoch,), bbox_inches='tight')
         plt.pause(0.1)
 
 
@@ -79,9 +80,9 @@ for epoch in range(10000):
         y_plot = y_pred.data.squeeze().cpu().numpy()
 
         if line3 is None:
-            line3 = ax.scatter(y_plot, x_plot, alpha=0.6)
+            line3 = ax2.scatter(y_plot, x_plot, alpha=0.6, s=0.9)
         else:
             line3.set_offsets(np.c_[y_plot, x_plot])
         fig.canvas.draw_idle()
-        fig.savefig('mdn' + str(epoch) + '.png', bbox_inches='tight')
+        fig.savefig('images/mdn%04d' % (epoch, ) + '.png', bbox_inches='tight')
         plt.pause(0.1)
