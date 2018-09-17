@@ -65,8 +65,7 @@ class MDNRNN(nn.Module):
         log_prob = mixture.log_prob(y)
         weighted_logprob = log_prob + pi
         log_sum = torch.logsumexp(weighted_logprob, dim=3)
-        log_sum = torch.logsumexp(log_sum, dim=2)
-        return torch.mean(-log_sum)
+        return -log_sum.mean()
 
 
 if __name__ == '__main__':
